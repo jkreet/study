@@ -1,0 +1,116 @@
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<link rel="stylesheet" href="style.css">
+
+<script>
+$(document).ready(function() {
+	// рисуем поле
+	mytable = $('<table></table>').attr({ class: "field" });
+	for (var i = 0; i < 8; i++) {
+		var row = $('<tr></tr>').appendTo(mytable);
+	
+        for (var j = 0; j < 8; j++) {
+            if ( (i+j)%2 ) { var color = "dark"; }
+            else { color = "light"; }
+			$('<td></td>').attr({ id: i+"-"+j, class: color, occupied: "false" }).appendTo(row); 
+		}
+	}
+	mytable.appendTo(".table");
+	
+	// заполн€ем поле шашками
+	var s = [];
+	var i=0;
+	$('td').each(function() { 
+		s = ($(this).attr('id')).split("-");
+		if ( s[0] < 3 && (s[0]*1 + s[1]*1)%2 ) { $(this).attr({occupied: "true"}).append('<div id="checker" class="white" color="white"></div>'); }
+		if ( s[0] > 4 && (s[0]*1 + s[1]*1)%2 ) { $(this).attr({occupied: "true"}).append('<div id="checker" class="black" color="black"></div>'); }
+		i++;
+	});
+
+	// двигаем шашки
+	$("div#checker").click(function() {
+		if ( $(this).hasClass("selected") ) {
+			$(this).removeClass("selected");
+			selected = "";
+		}
+		else {
+			$("div#checker").removeClass("selected");
+			selected = $(this).addClass("selected");
+			
+		}
+		//console.log("From " + selected.parent().attr('id'));
+	});
+	
+	$("td.dark").click(function() {
+		if ( selected != "" ) {
+			if ( $(this).attr("occupied") == "false" ) {
+				if ( check_move(selected, $(this)) == "OK" ) {
+					var coord_from = [];
+					var coord_to   = [];
+					coord_from = (selected.parent().attr('id')).split("-");
+					coord_to   = ($(this).attr('id')).split("-");
+					
+					console.log(coord_from[0] +"-" + coord_from[1] + " " + coord_to[0] + "-" + coord_to[1]);
+					
+					if ( Math.abs(coord_to[0] - coord_from[0]) == 2 ) { // похоже на попытку атаки
+						var attacked = [];
+						attacked[1] = (coord_to[1]*1 + coord_from[1]*1)/2;
+						attacked[0] = (coord_to[0]*1 + coord_from[0]*1)/2;
+						var att_field = $("#"+attacked[0]+"-"+attacked[1]+"");
+						if ( att_field.attr("occupied") == "true" ) {
+							console.log(att_field);
+							if ( att_field.children().attr("color") != selected.attr("color") ) {
+								att_field.children().remove();
+								att_field.attr({ occupied: "false" });
+							}
+							else {
+								wrong_move();
+							}
+						}
+						else {
+							wrong_move();
+						}
+					}
+					selected.parent().attr({ occupied: "false" });
+					$(this).append(selected).attr({ occupied: "true" });
+					selected.removeClass("selected");
+					selected = "";
+				}
+			}
+		}
+	});
+	
+	function check_move(from, to) { // функци€ проверки хода 
+		// модуль (коорд1откуда - коорд1куда) < 3
+		// модуль (коорд2откуда - коорд2куда) < 3
+		var coord_from = [];
+		var coord_to   = [];
+		coord_from = (from.parent().attr('id')).split("-");
+		coord_to   = (to.attr('id')).split("-");
+				
+		// дл€ чЄрных инвертируем координаты
+		if (selected.attr("color") == "black" ) {
+			coord_from[0] = Math.abs(coord_from[0]-7)
+			coord_to[0] = Math.abs(coord_to[0]-7)
+		}
+		
+		if ( coord_to[0] < coord_from[0] && Math.abs(coord_from[1] - coord_to[1]) > 2 ) { wrong_move(); } // запрещаем ход назад, но разрешаем съедать назад 
+		else if ( Math.abs(coord_to[1] - coord_from[1]) > 2 && Math.abs(coord_to[0] - coord_from[0]) > 2 ) { wrong_move(); } // запрещаем неверные ходы обычными шашками
+		else { return "OK"; }
+	};
+	
+	function wrong_move() {
+		selected.removeClass("selected");
+		selected = "";
+		console.log("Ќедопустимый ход"); 
+	}
+	
+});
+</script>
+
+</head>
+<body>
+<div class="table"></div>
+</body>
+</html>

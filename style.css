@@ -1,0 +1,24 @@
+* { padding: 0; margin: 0; }
+
+body { background: #777; }
+
+table { 
+	border-collapse: collapse;
+	margin: 50px;
+	text-align: center;
+	border: 1px solid #000;
+}
+
+td, .white, .black { 
+	width: 50px;
+	height: 50px; 
+
+}
+.light { background: #aa7746 url("bg.png"); }
+.dark  { background: #511812 url("bg.png") -50px 0; }
+
+.white{ background: url("checkers.png") -50px 0; }
+.black { background: url("checkers.png") ; }
+
+.white.selected { background: url("checkers.png") -50px -100px; }
+.black.selected { background: url("checkers.png") 0 -100px; }
